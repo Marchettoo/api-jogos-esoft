@@ -16,7 +16,10 @@ public class ApiController {
     private final AtomicLong idCounter = new AtomicLong(0);
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<LoginResponse> login(@RequestBody(required = false) LoginRequest request) {
+        if (request == null || request.getEmail() == null || request.getPassword() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
         if ("usuario@esoft.com".equals(request.getEmail()) && "Abc123".equals(request.getPassword())) {
             String token = UUID.randomUUID().toString();
             return ResponseEntity.ok(new LoginResponse(token));
@@ -41,7 +44,10 @@ public class ApiController {
     }
 
     @PostMapping("/jogos")
-    public ResponseEntity<Jogo> criarJogo(@RequestBody Jogo request) {
+    public ResponseEntity<Jogo> criarJogo(@RequestBody(required = false) Jogo request) {
+        if (!isJogoValido(request)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
         Long newId = idCounter.incrementAndGet();
         request.setId(newId);
         jogos.put(newId, request);
@@ -49,7 +55,10 @@ public class ApiController {
     }
 
     @PutMapping("/jogos/{id}")
-    public ResponseEntity<Jogo> atualizarJogo(@PathVariable Long id, @RequestBody Jogo request) {
+    public ResponseEntity<Jogo> atualizarJogo(@PathVariable Long id, @RequestBody(required = false) Jogo request) {
+        if (!isJogoValido(request)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
         if (jogos.containsKey(id)) {
             request.setId(id);
             jogos.put(id, request);
@@ -64,5 +73,14 @@ public class ApiController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
+    }
+
+    private boolean isJogoValido(Jogo jogo) {
+        if (jogo == null) return false;
+        if (jogo.getNome() == null || jogo.getNome().trim().isEmpty()) return false;
+        if (jogo.getTipo() == null || jogo.getTipo().trim().isEmpty()) return false;
+        if (jogo.getNota() == null) return false;
+        if (jogo.getReview() == null || jogo.getReview().trim().isEmpty()) return false;
+        return true;
     }
 }
