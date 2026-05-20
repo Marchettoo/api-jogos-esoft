@@ -8,6 +8,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
+@CrossOrigin(origins = "*") // <-- ESTA É A LINHA QUE LIBERA O CORS PARA O EXPO SNACK
 @RestController
 @RequestMapping("/")
 public class ApiController {
